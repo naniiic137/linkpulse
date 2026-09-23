@@ -21,7 +21,10 @@ jobs:
           cache-dependency-path: api/package-lock.json
       - run: npm ci
       - run: npm run typecheck
-      - run: npm test
+      - run: npm test -- --reporter=default --reporter=json --outputFile=vitest-report.json
+      - name: Test summary
+        if: always()
+        run: node -e "const r=require('./vitest-report.json');console.log('::notice title=API tests (in-memory)::'+r.numPassedTests+' passed, '+r.numFailedTests+' failed, '+r.numPendingTests+' skipped ('+r.numTotalTests+' total)')"
       - run: npm run build
 
   api-real-backends:
@@ -61,7 +64,10 @@ jobs:
       - name: Apply migrations
         run: npm run migrate
       - name: Store contract + app tests on real backends
-        run: npm run test:integration
+        run: npm run test:integration -- --reporter=default --reporter=json --outputFile=vitest-report.json
+      - name: Test summary
+        if: always()
+        run: node -e "const r=require('./vitest-report.json');console.log('::notice title=API tests (PostgreSQL 16 + Redis 7)::'+r.numPassedTests+' passed, '+r.numFailedTests+' failed, '+r.numPendingTests+' skipped ('+r.numTotalTests+' total)')"
       - name: Boot the server on PostgreSQL + Redis and smoke-test it
         env:
           STORE: postgres
@@ -97,7 +103,10 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm run typecheck
-      - run: npm test
+      - run: npm test -- --reporter=default --reporter=json --outputFile=vitest-report.json
+      - name: Test summary
+        if: always()
+        run: node -e "const r=require('./vitest-report.json');console.log('::notice title=Web tests::'+r.numPassedTests+' passed, '+r.numFailedTests+' failed, '+r.numPendingTests+' skipped ('+r.numTotalTests+' total)')"
       - run: npm run build
 
   docker:
