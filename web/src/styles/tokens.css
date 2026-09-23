@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f6f6fa;
+  --surface: #ffffff;
+  --surface-2: #f3f2f8;
+  --surface-3: #ebe9f3;
+  --border: #e5e3ee;
+  --border-strong: #d3d0e1;
+
+  /* Text (all >= 4.5:1 on --surface) */
+  --text: #16132b;
+  --text-2: #46425f;
+  --text-3: #686482;
+
+  /* Accent: one confident violet */
+  --accent: #5b3df5;
+  --accent-hover: #4a2de0;
+  --accent-press: #3f24c7;
+  --accent-soft: #efebff;
+  --accent-softer: #f7f5ff;
+  --accent-text: #4527d6;
+  --on-accent: #ffffff;
+
+  /* Status */
+  --ok: #0c7a54;
+  --ok-soft: #e4f5ed;
+  --warn: #935200;
+  --warn-soft: #fff3de;
+  --danger: #c0263a;
+  --danger-soft: #fdecee;
+  --neutral: #5d5a73;
+  --neutral-soft: #efeef4;
+
+  --chart-grid: #ecebf2;
+  --focus: 0 0 0 3px rgba(91, 61, 245, 0.35);
+
+  /* Type */
+  --font: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', Menlo, Consolas, monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.875rem;
+  --fs-base: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 1.875rem;
+
+  /* Shape */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --shadow-sm: 0 1px 2px rgba(22, 19, 43, 0.05);
+  --shadow-md: 0 1px 2px rgba(22, 19, 43, 0.04), 0 4px 12px rgba(22, 19, 43, 0.06);
+  --shadow-lg: 0 12px 40px rgba(22, 19, 43, 0.18), 0 2px 6px rgba(22, 19, 43, 0.08);
+
+  --sidebar-w: 240px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0e0c18;
+    --surface: #171526;
+    --surface-2: #1e1b30;
+    --surface-3: #27243b;
+    --border: #2b2842;
+    --border-strong: #3a3656;
+    --text: #f1effa;
+    --text-2: #c3bfd9;
+    --text-3: #9a96b3;
+    --accent: #8b74ff;
+    --accent-hover: #9c89ff;
+    --accent-press: #7a61ff;
+    --accent-soft: #2a2350;
+    --accent-softer: #201b3d;
+    --accent-text: #b3a5ff;
+    --on-accent: #0e0c18;
+    --ok: #4cd29a;
+    --ok-soft: #133528;
+    --warn: #f3b454;
+    --warn-soft: #3a2a10;
+    --danger: #ff7085;
+    --danger-soft: #3d1820;
+    --neutral: #b0acc6;
+    --neutral-soft: #26233a;
+    --chart-grid: #26233a;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  }
+}

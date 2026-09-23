@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: API - typecheck, unit + integration tests (in-memory), build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  api-real-backends:
+    name: API - same suite against PostgreSQL 16 + Redis 7
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: linkpulse
+          POSTGRES_PASSWORD: linkpulse
+          POSTGRES_DB: linkpulse
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U linkpulse -d linkpulse"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgres://linkpulse:linkpulse@localhost:5432/linkpulse
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - run: npm ci
+      - name: Apply migrations
+        run: npm run migrate
+      - name: Store contract + app tests on real backends
+        run: npm run test:integration
+      - name: Boot the server on PostgreSQL + Redis and smoke-test it
+        env:
+          STORE: postgres
+          PORT: '3501'
+          SEED_DEMO: 'true'
+          DEMO_TRAFFIC: 'false'
+          PREVIEW_FETCH: 'false'
+        run: |
+          npm run build
+          node dist/server.js > server.log 2>&1 &
+          PID=$!
+          for i in $(seq 1 30); do curl -sf localhost:3501/ready && break; sleep 1; done
+          curl -sf localhost:3501/ready | tee /dev/stderr | grep -q '"backend":"postgres+redis"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3501/launch)" = "302"
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3501/nope000)" = "404"
+          kill -TERM "$PID"
+          wait "$PID" || true
+          cat server.log | tail -5
+          grep -q 'shutting down' server.log
+
+  web:
+    name: Web - typecheck, tests, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build

@@ -1,0 +1,69 @@
+# Full stack: PostgreSQL 16 (source of truth) + Redis 7 (cache, rate limits, click stream,
+# HyperLogLogs, pub/sub) + API + nginx serving the dashboard and proxying short links.
+#
+#   docker compose up --build        ->  http://localhost:8080
+#
+# Demo login: demo@linkpulse.dev / demo-password-123 (fictional data, seeded on first start).
+# Change the secrets below before exposing this anywhere.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: linkpulse
+      POSTGRES_PASSWORD: linkpulse
+      POSTGRES_DB: linkpulse
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkpulse -d linkpulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # AOF so the click stream survives a Redis restart; LRU eviction is NOT used because
+    # rate-limit counters and the stream must not be evicted silently.
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./api
+    environment:
+      STORE: postgres
+      DATABASE_URL: postgres://linkpulse:linkpulse@postgres:5432/linkpulse
+      REDIS_URL: redis://redis:6379
+      PORT: "3501"
+      PUBLIC_BASE_URL: http://localhost:8080
+      WEB_ORIGIN: http://localhost:8080
+      TRUST_PROXY: "true"
+      JWT_SECRET: change-me-in-production-please-use-32-plus-random-chars
+      CODE_SECRET: change-me-code-permutation-key
+      VISITOR_SALT: change-me-visitor-salt
+      SEED_DEMO: "true"
+      LOG_LEVEL: info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stop_grace_period: 15s
+
+  web:
+    build: ./web
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

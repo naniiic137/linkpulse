@@ -1,0 +1,14 @@
+{
+  "name": "linkpulse",
+  "private": true,
+  "description": "URL shortener with real-time analytics: Fastify + TypeScript API, React dashboard, Redis + PostgreSQL.",
+  "scripts": {
+    "setup": "npm --prefix api ci && npm --prefix web ci",
+    "dev": "node scripts/dev.mjs",
+    "test": "npm --prefix api test && npm --prefix web test",
+    "typecheck": "npm --prefix api run typecheck && npm --prefix web run typecheck",
+    "build": "npm --prefix api run build && npm --prefix web run build",
+    "loadtest": "npm --prefix api run loadtest"
+  },
+  "license": "UNLICENSED"
+}
