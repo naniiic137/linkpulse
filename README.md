@@ -324,7 +324,7 @@ npm test                              # API + web
 cd api && npm run test:integration    # same suite on real PostgreSQL + Redis (needs DATABASE_URL/REDIS_URL)
 ```
 
-**API: 107 tests** (Vitest) run locally against the in-memory backend. 7 more (the PostgreSQL + Redis store contract) are skipped locally and run in CI.
+**API: 114 tests** (Vitest). Locally, 107 run against the in-memory backend and the 7 PostgreSQL + Redis contract tests are skipped. In CI, all **114 pass against real PostgreSQL 16 + Redis 7** (every app-level test is re-run on the real backends), and the in-memory run passes too. The counts are published as annotations on each CI run.
 
 | Area | What is covered |
 | --- | --- |
